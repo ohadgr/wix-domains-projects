@@ -23,7 +23,8 @@ The human engineer supplied observed DevTools evidence, reviewed generated outpu
 | Skipped API tests | Read `conftest.py` and checked for `.env` support | Key read only from the environment; no `.env` loading; tests left skipped |
 | Refactor | Moved repeated values into shared helpers (below) | Full suite unchanged: 4 passed, 2 skipped, 0 failed |
 | Documentation | Updated the five markdown files, then the README and this log for the refactor | Included in commit `aba37c6` |
-| Final cleanup | Updated time statements, statuses and this log; removed debug output from `tests/ui/test_whois.py` | Pending the engineer's review and commit |
+| Final cleanup | Updated time statements, statuses and this log; removed debug output from `tests/ui/test_whois.py` | Included in commit `0819f3b` (13:59:43 +0200) |
+| WHOIS investigation | Standalone timing checks of the results page; documentation updates | Registrar details load slowly or intermittently; a later timeout change (15000 to 45000 ms) is not part of `0819f3b` |
 
 ### Configuration and Test-Data Refactor
 
@@ -90,12 +91,12 @@ Verified by running code (Claude Code's own runs): the hydration timing (value 7
 
 ## 7. Final Test Results
 
-An earlier full run gave 4 passed, 2 skipped, 0 failed. The **latest full run gave 3 passed, 1 failed, 2 skipped**: the WHOIS test failed because the expected registrar `REG.RU` was absent from the rendered page. The engineer then reran the WHOIS test twice (as reported by the engineer) and both reruns passed. WHOIS is documented as potentially flaky and requiring investigation, not as a confirmed Wix defect.
+An earlier full run gave 4 passed, 2 skipped, 0 failed. The **latest full run gave 3 passed, 1 failed, 2 skipped**: the WHOIS test failed because the expected registrar `REG.RU` was absent from the rendered page. WHOIS navigated successfully, but registrar details were still loading. The registrar assertion timeout was then changed from 15000 to 45000 ms and one isolated WHOIS run passed. Full-suite stability after this change has not been verified. WHOIS is documented as potentially flaky and requiring investigation; the root cause is not confirmed and it is not a Wix defect.
 
 | Status | Count | Tests |
 |---|---:|---|
 | Passed | 3 | Unauthenticated API; Storefront UI; Business Name Generator UI |
-| Failed | 1 | WHOIS UI (intermittent; passed in both engineer reruns) |
+| Failed | 1 | WHOIS UI (intermittent; one isolated run passed after the timeout change) |
 | Skipped | 2 | Authenticated API tests (`WIX_API_KEY` not configured) |
 
 The passing unauthenticated API test asserts the observed 200. It documents behavior and does not prove correct authentication behavior.
@@ -104,10 +105,10 @@ The passing unauthenticated API test asserts the observed 200. It documents beha
 
 - The UI tests depend on a `__react*` readiness workaround, which is fragile.
 - Authenticated API behavior is unverified; payment and registration scenarios were not executed.
-- The WHOIS UI test is potentially flaky and needs investigation. It failed in the latest full run and in 2 of 3 isolated runs by Claude Code (after its debug output was removed, which a standalone check showed was not the cause); a standalone check found the registrar data appearing after 9 to 17 seconds and once not within 30 seconds. The engineer's two later reruns passed. The cause is not established, and it is not a confirmed Wix defect.
+- The WHOIS UI test is potentially flaky and needs investigation. It failed in the latest full run and in 2 of 3 isolated runs by Claude Code (after its debug output was removed, which a standalone check showed was not the cause); a standalone check found the registrar data appearing after 9 to 17 seconds and once not within 30 seconds. After the timeout was raised to 45000 ms, one isolated run passed; full-suite stability is unverified. The cause is not established, and it is not a confirmed Wix defect.
 - Only one registered domain was used. Flakiness was checked for the generator test only (3 of 3 passed).
 - No agent configuration files (`CLAUDE.md`, `AGENTS.md`) were used. No personal passwords or API key values were intentionally given to any AI tool.
-- Elapsed time through the latest pushed commit (`aba37c6`, 13:42:42 +0200): 2h 35m 57s from the first commit (11:06:45 +0200). **Provisional** until the engineer's final commit; the deadline is 14:06:45 +0200.
+- Elapsed time through the previous final commit (`0819f3b`, 13:59:43 +0200): 2h 52m 58s from the first commit (11:06:45 +0200). Any later commit extends this; the deadline is 14:06:45 +0200.
 
 ## 9. Engineering Ownership
 

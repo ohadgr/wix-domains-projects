@@ -53,6 +53,10 @@ Severity is the demonstrated impact. Priority is the urgency of follow-up.
 - **Status:** **Not Executed.** Production was used with no payment simulation or backend access, and no purchases were made. No defect is claimed.
 - **Why it matters:** these are the highest business risks in the test plan (TC-11 to TC-14). They need a controlled environment with provider simulation and reconciliation access.
 
+## Additional Note — WHOIS UI test is flaky
+
+The latest full suite gave 3 passed, 1 failed (WHOIS), 2 skipped. WHOIS navigated to the results page, but the registrar details (`REG.RU`) were still loading when the 15s assertion timed out. After the timeout was raised to 45000 ms, one isolated run passed. Full-suite stability after the change is unverified, and the root cause (slow WHOIS data, load or test timing) is not confirmed. This is an automation reliability issue, not a confirmed Wix defect, and it is not counted as a finding.
+
 ## Summary
 
 No confirmed product defects. F-01 and F-02 need owner or account clarification. F-03 is a low-severity potential UX issue. Initial UI test failures were traced to automation timing and a wrong locator, not to product bugs.

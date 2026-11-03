@@ -58,4 +58,4 @@ def test_whois_registered_domain(page: Page):
         exact=False,
     ).first
 
-    expect(registrar).to_be_visible(timeout=15000)
+    expect(registrar).to_be_visible(timeout=45000)
