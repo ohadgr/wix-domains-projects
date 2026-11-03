@@ -8,3 +8,5 @@ playwright-report/
 test-results/
 *.pyc
 .DS_Store
+.idea/
+whois-after-search.png
