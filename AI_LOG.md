@@ -4,9 +4,9 @@
 
 | Tool | Contribution |
 |---|---|
-| ChatGPT | Assignment planning, risk prioritization, troubleshooting, review, and drafting of early versions of `FINDINGS.md`, `README.md` and this log |
+| ChatGPT | (As recorded by the engineer; ChatGPT sessions are not visible in the repository.) Assignment planning, risk prioritization, troubleshooting, review, and drafting of early versions of `FINDINGS.md`, `README.md` and this log |
 | Claude Code | Generated `ARCHITECTURE.md` and `TEST_PLAN.md`; implemented the API tests and supporting files (`config.py`, `conftest.py`, `requirements.txt`, `pytest.ini`), plus the later `testdata.py`/`PagePath` refactor; investigated and fixed the UI test failures; wrote the Storefront test; checked why API tests were skipped; updated the final documentation |
-| Playwright Codegen | Recording of UI interactions and locator discovery |
+| Playwright Codegen | Recording of UI interactions and locator discovery (as recorded by the engineer; not visible in the repository) |
 
 The human engineer supplied observed DevTools evidence, reviewed generated output, ran tests, and decided scope and priorities.
 
@@ -22,7 +22,8 @@ The human engineer supplied observed DevTools evidence, reviewed generated outpu
 | Storefront test | Inspected DOM and network, wrote the test | Passes; asserts UI text and the page's availability response |
 | Skipped API tests | Read `conftest.py` and checked for `.env` support | Key read only from the environment; no `.env` loading; tests left skipped |
 | Refactor | Moved repeated values into shared helpers (below) | Full suite unchanged: 4 passed, 2 skipped, 0 failed |
-| Documentation | Updated the five markdown files, then the README and this log for the refactor | This update |
+| Documentation | Updated the five markdown files, then the README and this log for the refactor | Included in commit `aba37c6` |
+| Final cleanup | Updated time statements, statuses and this log; removed debug output from `tests/ui/test_whois.py` | Pending the engineer's review and commit |
 
 ### Configuration and Test-Data Refactor
 
@@ -33,7 +34,15 @@ The human engineer supplied observed DevTools evidence, reviewed generated outpu
   - Updated the three UI tests and the API test to use them.
 - **Not changed:** assertions, hydration handling and test logic. The Storefront test's `"check-domain-availability"` response filter was left as a literal substring.
 - **Result:** full suite ran after the change: 4 passed, 2 skipped, 0 failed, matching the earlier result.
-- **Human review:** Claude Code ran the suite; the diff should still be reviewed by a human before submission.
+- **Verification:** Claude Code ran the suite after the change. This log records no separate human review of the refactor diff.
+
+### Cross-Model Review Workflow
+
+- **Roles:** Claude Code handled implementation and debugging. ChatGPT (GPT-6, as stated by the engineer) performed an independent AI-assisted review of Claude Code's pushed GitHub implementation and documentation, identified issues and recommended corrections.
+- **Nature of the review:** an informal AI-assisted code review. It was not a formal, scored LLM-as-a-Judge evaluation: there was no scoring rubric, no repeated or calibrated judging, and no measured agreement between models.
+- **Limits of ChatGPT's role:** it reviewed the pushed repository content only. It did not execute tests, and none of the recorded test results come from it.
+- **Records:** the specific issues it raised and the corrections made are not itemized in this log. The review sessions are not visible in the repository.
+- **Responsibility:** the human engineer retained final responsibility. They reviewed the recommendations, decided which to apply and retained final responsibility for the repository and submission.
 
 ## 3. Key Prompts (shortened)
 
@@ -48,7 +57,7 @@ The human engineer supplied observed DevTools evidence, reviewed generated outpu
 
 | Issue | How it was caught | Resolution |
 |---|---|---|
-| Claude Code assumed a request without `Authorization` would return 401/403 | It ran the test and got HTTP 200; a direct request confirmed it | Recorded as an observation (F-01), not a vulnerability. The test was later revised to assert the observed 200 |
+| Claude Code assumed a request without `Authorization` would return 401/403 | It ran the test and got HTTP 200; a direct request confirmed it | Recorded as an observation (F-01), not a vulnerability. The test was later revised to assert the observed 200 (the revision happened outside the Claude Code session recorded here) |
 | Generator test asserted the exact heading "Choose a business name" | Test failed after navigation; page inspection showed "Choose a business name that fits your vision" | Changed the locator to a partial match |
 | The Storefront probe used `get_by_role("textbox")` | The element vanished after ~1.5s; its role had become `searchbox` | Switched to the `searchbox` role |
 | Early WHOIS failure was logged as "root cause unconfirmed" | Later debugging showed the search never ran because the text was filled before hydration | Hydration wait added; the finding was reclassified as automation timing |
@@ -58,13 +67,15 @@ None of these was treated as a confirmed Wix defect.
 
 ## 5. What Was Verified by a Human
 
+*As recorded by the engineer; Claude Code cannot independently confirm these.*
+
 - Manual exploration of the four surfaces and the DevTools evidence used in `ARCHITECTURE.md`.
 - The manual API request with a key (reported as `400 INVALID_TARGET_ACCOUNT_ID`) and its interpretation. Claude Code never saw or handled the key value.
 - Execution of the pytest suite and review of results.
 - Decisions on what counts as a defect, and the exclusion of purchases, payments and registrations.
 - Final responsibility for repository contents and submission.
 
-Verified by running code (Claude Code's own runs): the hydration timing (value 76 characters at 0.5s, 0 at 1.0s; `__react*` properties appear at ~1.1s), the Storefront availability request and response, and the test results. A human should re-run these before relying on them.
+Verified by running code (Claude Code's own runs): the hydration timing (value 76 characters at 0.5s, 0 at 1.0s; `__react*` properties appear at ~1.1s), the Storefront availability request and response, and the test results. These were not independently re-run by a human as far as this log can show.
 
 ## 6. Changed, Rejected or Deferred
 
@@ -74,17 +85,18 @@ Verified by running code (Claude Code's own runs): the hydration timing (value 7
 | Arbitrary sleeps as a fix | Rejected | Used an event-based hydration wait; replaced the WHOIS 5s sleep with a URL assertion |
 | Confirmed-bug classification | Rejected | Evidence insufficient (F-01, F-02, F-03) |
 | Adding `.env` loading | Deferred | Needs a new dependency; not requested |
-| Allure, mobile, accessibility, payment scenarios | Deferred / excluded | Timebox and Production safety |
+| Allure | Deferred | Optional; not essential within the timebox |
+| Mobile, accessibility, cross-browser, payment and registration scenarios | Not executed | Timebox and Production safety |
 
 ## 7. Final Test Results
 
-`python -m pytest`: 4 passed, 2 skipped, 0 failed.
+An earlier full run gave 4 passed, 2 skipped, 0 failed. The **latest full run gave 3 passed, 1 failed, 2 skipped**: the WHOIS test failed because the expected registrar `REG.RU` was absent from the rendered page. The engineer then reran the WHOIS test twice (as reported by the engineer) and both reruns passed. WHOIS is documented as potentially flaky and requiring investigation, not as a confirmed Wix defect.
 
 | Status | Count | Tests |
 |---|---:|---|
-| Passed | 4 | Unauthenticated API; Storefront UI; WHOIS UI; Business Name Generator UI |
+| Passed | 3 | Unauthenticated API; Storefront UI; Business Name Generator UI |
+| Failed | 1 | WHOIS UI (intermittent; passed in both engineer reruns) |
 | Skipped | 2 | Authenticated API tests (`WIX_API_KEY` not configured) |
-| Failed | 0 | — |
 
 The passing unauthenticated API test asserts the observed 200. It documents behavior and does not prove correct authentication behavior.
 
@@ -92,10 +104,11 @@ The passing unauthenticated API test asserts the observed 200. It documents beha
 
 - The UI tests depend on a `__react*` readiness workaround, which is fragile.
 - Authenticated API behavior is unverified; payment and registration scenarios were not executed.
+- The WHOIS UI test is potentially flaky and needs investigation. It failed in the latest full run and in 2 of 3 isolated runs by Claude Code (after its debug output was removed, which a standalone check showed was not the cause); a standalone check found the registrar data appearing after 9 to 17 seconds and once not within 30 seconds. The engineer's two later reruns passed. The cause is not established, and it is not a confirmed Wix defect.
 - Only one registered domain was used. Flakiness was checked for the generator test only (3 of 3 passed).
 - No agent configuration files (`CLAUDE.md`, `AGENTS.md`) were used. No personal passwords or API key values were intentionally given to any AI tool.
-- Total time spent: `[PLACEHOLDER: total time]`.
+- Elapsed time through the latest pushed commit (`aba37c6`, 13:42:42 +0200): 2h 35m 57s from the first commit (11:06:45 +0200). **Provisional** until the engineer's final commit; the deadline is 14:06:45 +0200.
 
 ## 9. Engineering Ownership
 
-AI sped up implementation and documentation. It did not replace engineering judgment. Each artifact was checked against real browser behavior, API responses and pytest runs, and unverified assumptions are disclosed.
+AI sped up implementation and documentation. Claude Code checked its work against real browser behavior, API responses and pytest runs in its own sessions. Human verification is limited to the items in section 5, and unverified assumptions are disclosed. The submission is not complete until the engineer reviews and makes the final commit.

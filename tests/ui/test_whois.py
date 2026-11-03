@@ -46,20 +46,11 @@ def test_whois_registered_domain(page: Page):
     expect(search_button).to_be_visible()
     expect(search_button).to_be_enabled()
 
-    def log_response(response):
-        if "wix.com" in response.url:
-            print(f"HTTP {response.status}: {response.url}")
-
-    page.on("response", log_response)
-
     search_button.click()
     expect(page).to_have_url(
         re.compile(r"/domain/result/whois\?query=" + re.escape(DOMAIN)),
         timeout=30000,
     )
-
-    print(f"Final URL: {page.url}")
-
 
     # Assert: Verify actual WHOIS registrar information
     registrar = page.get_by_text(

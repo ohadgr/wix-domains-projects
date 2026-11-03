@@ -169,7 +169,7 @@ The assignment execution subset does not attempt to validate all production-leve
 - **Not Executed:** Not implemented or deliberately excluded.
 - **Blocked:** Attempted but prevented by a documented limitation.
 
-**Final run: 4 passed, 2 skipped, 0 failed** (6 automated tests). Statuses below reflect actual execution.
+**Earlier full run: 4 passed, 2 skipped, 0 failed. Latest full run: 3 passed, 1 failed (WHOIS, TC-07), 2 skipped** (6 automated tests). Statuses below reflect actual execution.
 
 | ID | Surface / Flow | Scenario | Priority | Layer | Status |
 |---|---|---|---|---|---|
@@ -179,7 +179,7 @@ The assignment execution subset does not attempt to validate all production-leve
 | TC-04 | Public API | Invalid domain syntax returns a controlled error | P1 | API | Not Executed (a missing `domain` parameter returned 400 in exploration only) |
 | TC-05 | Public API | Missing credentials | P1 | API | **Passed**, but asserts the observed HTTP 200; rejection not verified (F-01) |
 | TC-06 | Storefront | Search shows availability status; matches the page's availability response | P1 | UI | **Passed** |
-| TC-07 | WHOIS | Lookup shows registration data | P1 | UI / Exploratory | **Passed** (automated: registrar REG.RU; other fields manual only) |
+| TC-07 | WHOIS | Lookup shows registration data | P1 | UI / Exploratory | **Intermittent / Flaky** (automated: registrar REG.RU; other fields manual only). The latest full suite failed because the registrar data was missing from the rendered page; two targeted reruns then passed (human-reported). Needs investigation; not a confirmed Wix defect |
 | TC-08 | Business Name Generator | Description yields names and domain suggestions | P1 | UI / Exploratory | **Passed** (structure only; selected-name handoff explored manually) |
 | TC-09 | Cross-surface | Availability agrees across Storefront, WHOIS and Public API | P1 | Integration | Partial: Storefront UI vs. its response **Passed**; WHOIS and public API comparison Not Executed |
 | TC-10 | Suggestions and Pricing | Structure, pagination, duplicates, TLD pricing | P1 | Exploratory / API | Not Executed (observed manually only: 50 suggestions, cursor pagination) |
@@ -302,9 +302,9 @@ If a blocker occurs, record the exact reason and available evidence. Blocked tes
 | `FINDINGS.md` (up to five findings) | Done (5 findings, none confirmed defects) |
 | Public API automation executed | Partial: 1 passed, 2 skipped (no `WIX_API_KEY`) |
 | At least one web-door UI test | Done: Storefront, WHOIS, Business Name Generator all passed |
-| README command, time, strategy, next steps | Done; total time and final commit time are placeholders |
+| README command, time, strategy, next steps | Done; time spent is provisional (through commit `aba37c6`) |
 | AI usage in `AI_LOG.md` | Done |
-| Final commit before 14:07 Israel time | Pending |
+| Final commit before 14:07 Israel time | Partial: commit `aba37c6` pushed at 13:42:42 (2h 35m 57s elapsed); final cleanup commit pending |
 
 If API execution is blocked, preserve the runnable implementation and document the limitation accurately.
 

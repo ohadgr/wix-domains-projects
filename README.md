@@ -4,8 +4,8 @@ A risk-based quality assessment of Wix Domains: system exploration, test plannin
 
 **Target environment:** Production (public surfaces only; no purchases, payments or registrations)
 **Execution date:** November 3, 2026
-**Time spent:** started at the first commit, 11:06 (Israel time); final commit time: `[PLACEHOLDER: final commit time]`; total: `[PLACEHOLDER: total hours/minutes]`
-**Latest result:** 4 passed, 2 skipped, 0 failed
+**Time spent:** Approximately 3 hours (first commit: 2026-11-03 11:06:45 +0200; final submission commit before 14:06:45 +0200).
+**Execution history:** an earlier full run gave 4 passed, 2 skipped, 0 failed. The latest full run gave **3 passed, 1 failed, 2 skipped**: the WHOIS test failed because the expected registrar `REG.RU` was absent from the rendered page. The engineer then reran the WHOIS test twice (as reported by the engineer) and both reruns passed. WHOIS is treated as a potentially flaky test that needs investigation, not a confirmed Wix defect (see section 6).
 
 ## 1. Scope and Coverage
 
@@ -79,7 +79,7 @@ Both base URLs are optional environment overrides; the Production defaults were 
 
 ## 5. Latest Test Execution
 
-**Environment:** Production. **Command:** `python -m pytest -v`. **Result: 4 passed, 2 skipped, 0 failed.**
+**Environment:** Production. **Command:** `python -m pytest -v`. **Earlier full run: 4 passed, 2 skipped, 0 failed. Latest full run: 3 passed, 1 failed (WHOIS), 2 skipped. WHOIS reruns: 2 of 2 passed (reported by the engineer).**
 
 | Test | Result | Notes |
 |---|---|---|
@@ -87,7 +87,7 @@ Both base URLs are optional environment overrides; the Production defaults were 
 | API: observed response contract | Skipped | `WIX_API_KEY` not configured |
 | API: unauthenticated request | Passed | Asserts the **observed** 200; documents behavior, does not verify rejection |
 | UI: Storefront search for `lotus-music.com` | Passed | UI says "already registered"; page's availability response has `available = false` |
-| UI: WHOIS lookup | Passed | Results page shows registrar REG.RU |
+| UI: WHOIS lookup | Passed in the earlier run and both reruns; **Failed in the latest full run** | Intermittent: `REG.RU` was absent from the rendered page in the failing run. Flaky, under investigation |
 | UI: Business Name Generator | Passed | Names and domain suggestions appear; names vary per run |
 
 Notes on the UI tests:
@@ -102,7 +102,7 @@ Notes on the UI tests:
 - `www.wix.com` and `www.wixapis.com` expose the same availability path; a shared backend is **unverified**.
 - Only one registered domain (`lotus-music.com`) was used. Available-domain, premium and invalid-input cases are not automated.
 - Mobile, accessibility, cross-browser and AI-quality coverage were not executed.
-- `test_whois.py` still contains debug `print` and response-logging lines.
+- **WHOIS test is potentially flaky (needs investigation):** it failed in the latest full run, passed in the engineer's two reruns, and in my separate checks failed 2 of 3 isolated runs (1 passed). The test navigates to the results page, but the registrar data (`REG.RU`) sometimes appeared only after 9 to 17 seconds and once not within 30 seconds in a standalone check, so the test's 15s wait can time out. Whether this is slow WHOIS data, Wix load or a test-timing issue is not established; no product defect is claimed.
 
 ## 7. Quality Strategy (five lines)
 
