@@ -163,36 +163,38 @@ The assignment execution subset does not attempt to validate all production-leve
 
 ### Execution Status Definitions
 
-- **Planned:** Selected for execution but not yet run.
-- **Executed / Passed:** Actually executed and passed.
-- **Executed / Failed:** Actually executed and failed.
-- **Not Executed:** Deliberately excluded from the assignment.
-- **Blocked:** Execution attempted but prevented by a documented limitation.
+- **Planned:** Selected, not yet run.
+- **Passed / Failed:** Actually executed with that result.
+- **Skipped:** Implemented and collected, but skipped at runtime (no `WIX_API_KEY`). Not a pass.
+- **Not Executed:** Not implemented or deliberately excluded.
+- **Blocked:** Attempted but prevented by a documented limitation.
 
-All statuses below reflect the planning stage and must be updated after actual execution.
+**Final run: 4 passed, 2 skipped, 0 failed** (6 automated tests). Statuses below reflect actual execution.
 
 | ID | Surface / Flow | Scenario | Priority | Layer | Status |
 |---|---|---|---|---|---|
-| TC-01 | Public API | Registered domain (`lotus-music.com`) reports unavailable | P1 | API | Planned |
-| TC-02 | Public API | Dynamic candidate returns valid availability data | P1 | API | Planned |
-| TC-03 | Public API | Response matches documented contract | P1 | API | Planned |
-| TC-04 | Public API | Invalid domain syntax returns a controlled error | P1 | API | Planned |
-| TC-05 | Public API | Missing or invalid credentials are rejected | P1 | API | Planned |
-| TC-06 | Storefront | Domain search displays availability status | P1 | UI | Planned |
-| TC-07 | WHOIS | Lookup displays registration metadata and handles redaction | P1 | UI / Exploratory | Planned |
-| TC-08 | Business Name Generator | Description generates names; selection leads to related domains | P1 | Exploratory | Planned |
-| TC-09 | Cross-surface | Availability agrees across Storefront, WHOIS and Public API | P1 | Integration | Planned |
-| TC-10 | Suggestions and Pricing | Suggestion structure, pagination, duplicates and supported TLD pricing | P1 | Exploratory / API | Planned |
+| TC-01 | Public API | Registered domain (`lotus-music.com`) reports unavailable | P1 | API | **Skipped** (no key) |
+| TC-02 | Public API | Dynamic candidate returns valid availability data | P1 | API | Not Executed |
+| TC-03 | Public API | Observed response contract (not a full official schema) | P1 | API | **Skipped** (no key) |
+| TC-04 | Public API | Invalid domain syntax returns a controlled error | P1 | API | Not Executed (a missing `domain` parameter returned 400 in exploration only) |
+| TC-05 | Public API | Missing credentials | P1 | API | **Passed**, but asserts the observed HTTP 200; rejection not verified (F-01) |
+| TC-06 | Storefront | Search shows availability status; matches the page's availability response | P1 | UI | **Passed** |
+| TC-07 | WHOIS | Lookup shows registration data | P1 | UI / Exploratory | **Passed** (automated: registrar REG.RU; other fields manual only) |
+| TC-08 | Business Name Generator | Description yields names and domain suggestions | P1 | UI / Exploratory | **Passed** (structure only; selected-name handoff explored manually) |
+| TC-09 | Cross-surface | Availability agrees across Storefront, WHOIS and Public API | P1 | Integration | Partial: Storefront UI vs. its response **Passed**; WHOIS and public API comparison Not Executed |
+| TC-10 | Suggestions and Pricing | Structure, pagination, duplicates, TLD pricing | P1 | Exploratory / API | Not Executed (observed manually only: 50 suggestions, cursor pagination) |
 | TC-11 | Charging | Retries/timeouts do not cause duplicate charges | P0 | Integration | Not Executed |
 | TC-12 | Payment and Registration | Registration failure after payment triggers recovery or refund | P0 | Integration | Not Executed |
-| TC-13 | Registration | Concurrent or repeat registration of the same domain is prevented | P0 | Integration | Not Executed |
+| TC-13 | Registration | Concurrent or repeat registration is prevented | P0 | Integration | Not Executed |
 | TC-14 | Premium Pricing | Registration and renewal prices are distinguished | P0 | Integration | Not Executed |
 | TC-15 | Domain Lifecycle | Renewal, transfer, expiration and DNS behavior | P2 | Manual / Integration | Not Executed |
 | TC-16 | Mobile Web | Responsive layout, touch, keyboard and price visibility | P2 | UI / Mobile Web | Not Executed |
 
+Automation notes: the three UI tests wait for React hydration (`__react*` properties) before filling inputs, because text entered earlier is discarded. This is fragile (F-03). The generator test passed 3 of 3 repeat runs; the others were not repeated systematically.
+
 Manual DevTools observations in `ARCHITECTURE.md` are exploratory evidence, not automated test passes.
 
-Public API positive tests may become **Blocked** if the account-level API key lacks the required permissions. Missing-credentials negative testing can be executed independently, subject to Production safety.
+The authenticated API tests are **Skipped**, not Passed: `WIX_API_KEY` is not configured in the test environment and `.env` is not loaded automatically. A manual run with a key reportedly returned `400 INVALID_TARGET_ACCOUNT_ID`, so account permissions are unverified (F-02). If confirmed as a limitation after the key is configured, those tests become **Blocked**.
 
 ## 6. Test Data and Environment Strategy
 
@@ -229,7 +231,8 @@ tests/
   api/
   ui/
 conftest.py
-config.py
+config.py        (base URLs, PagePath, page_url)
+testdata.py       (shared test data)
 requirements.txt
 pytest.ini
 ```
@@ -290,6 +293,18 @@ If a blocker occurs, record the exact reason and available evidence. Blocked tes
 - AI usage, corrections and limitations recorded in `AI_LOG.md`.
 - No secrets committed.
 - Final Git commit completed before 14:07 Israel time.
+
+### Exit Criteria Status
+
+| Criterion | Status |
+|---|---|
+| Four surfaces mapped | Done |
+| `FINDINGS.md` (up to five findings) | Done (5 findings, none confirmed defects) |
+| Public API automation executed | Partial: 1 passed, 2 skipped (no `WIX_API_KEY`) |
+| At least one web-door UI test | Done: Storefront, WHOIS, Business Name Generator all passed |
+| README command, time, strategy, next steps | Done; total time and final commit time are placeholders |
+| AI usage in `AI_LOG.md` | Done |
+| Final commit before 14:07 Israel time | Pending |
 
 If API execution is blocked, preserve the runnable implementation and document the limitation accurately.
 

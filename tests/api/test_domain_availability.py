@@ -1,5 +1,5 @@
 
-import config
+from testdata import REGISTERED_DOMAIN
 
 
 def _availability(response):
@@ -21,7 +21,7 @@ def _availability(response):
 
 def test_registered_domain_is_unavailable(check_availability):
     """A known registered domain must not be available."""
-    response = check_availability(config.REGISTERED_DOMAIN)
+    response = check_availability(REGISTERED_DOMAIN)
 
     assert response.status_code == 200, (
         f"Expected HTTP 200, got {response.status_code}"
@@ -29,13 +29,13 @@ def test_registered_domain_is_unavailable(check_availability):
 
     availability = _availability(response)
 
-    assert availability.get("domain") == config.REGISTERED_DOMAIN, (
-        f"Expected domain {config.REGISTERED_DOMAIN}, "
+    assert availability.get("domain") == REGISTERED_DOMAIN, (
+        f"Expected domain {REGISTERED_DOMAIN}, "
         f"got {availability.get('domain')!r}"
     )
 
     assert availability.get("available") is False, (
-        f"Expected registered domain {config.REGISTERED_DOMAIN} "
+        f"Expected registered domain {REGISTERED_DOMAIN} "
         f"to be unavailable, "
         f"got {availability.get('available')!r}"
     )
@@ -47,7 +47,7 @@ def test_observed_availability_response_contract(check_availability):
 
     This is not a complete official schema validation.
     """
-    response = check_availability(config.REGISTERED_DOMAIN)
+    response = check_availability(REGISTERED_DOMAIN)
 
     assert response.status_code == 200, (
         f"Expected HTTP 200, got {response.status_code}"
@@ -84,7 +84,7 @@ def test_unauthenticated_availability_response(
     against the official API documentation.
     """
     response = check_availability_unauthenticated(
-        config.REGISTERED_DOMAIN
+        REGISTERED_DOMAIN
     )
 
     assert response.status_code == 200, (
@@ -94,8 +94,8 @@ def test_unauthenticated_availability_response(
 
     availability = _availability(response)
 
-    assert availability.get("domain") == config.REGISTERED_DOMAIN, (
-        f"Expected domain {config.REGISTERED_DOMAIN}, "
+    assert availability.get("domain") == REGISTERED_DOMAIN, (
+        f"Expected domain {REGISTERED_DOMAIN}, "
         f"got {availability.get('domain')!r}"
     )
 
